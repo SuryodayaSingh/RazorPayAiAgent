@@ -10,6 +10,18 @@ const PaymentSchema= new mongoose.Schema({
         type:  String,
         index: true,
     },
+
+    recoveryOrderId:{
+        type:  String,
+        index: true,
+    },
+
+
+    recoveryPaymentId:{
+        type: String,
+        required: true,
+        unique: true,
+    } ,
     customerId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Customer",
@@ -55,6 +67,19 @@ const PaymentSchema= new mongoose.Schema({
     aiReason: String,
 
     createdAtRazorPay: Number,
+
+    recoveryStatus: {
+        type: String,
+        enum: [
+           "NOT_STARTED",
+                "PENDING",
+                "SUCCESS",
+                "FAILED",
+            ],
+            default: "NOT_STARTED",
+        
+    },
+    recoveredAt: Date,
 });
 
 
