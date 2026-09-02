@@ -98,6 +98,10 @@ export async function POST(req: NextRequest) {
 
                              if(payment) {
                                 console.log("Payment already exists:", razorpayPaymentId);
+                                return NextResponse.json({
+                                    success: true,
+                                    message: "Payment Already processed",
+                                }, {status: 200});
                              } else {
                                 payment = await PaymentSchema.create({
                                     razorpayPaymentId,
@@ -170,7 +174,7 @@ export async function POST(req: NextRequest) {
 
                                     recoveryAction = await executeRecoveryAction(
                                         payment.razorpayPaymentId,
-                                        payment.razorpayOrdeId,
+                                        payment.razorpayOrderId,
                                         aiResult,
                                         email,
                                         {
