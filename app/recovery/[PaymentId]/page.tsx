@@ -324,7 +324,7 @@ export default function RecoveryPage() {
                         Payment not found
                     </h1>
 
-                    <p className="mt-2 text-gray-500">
+                    <p className="mt-3 text-gray-500">
                         We could not find this payment.
                     </p>
 
