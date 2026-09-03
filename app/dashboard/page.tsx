@@ -1,6 +1,6 @@
 "use client";
 
-import router from "next/router";
+import {useRouter} from "next/navigation";
 import { useEffect, useState } from "react";
 
 type DashboardData = {
@@ -57,6 +57,9 @@ export default function DashboardPage() {
     const [data, setData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    
+    const router = useRouter();
+
 
     const fetchDashboard = async () => {
         try {
@@ -239,8 +242,8 @@ export default function DashboardPage() {
 
                 <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
 
-                    <div onClick={() => router.push("/Payments?status=totalPayments")}
-                     className="rounded-xl bg-white p-6 shadow-sm">
+                    <div onClick={() => router.push("/Payments")}
+                     className="cursor-pointer rounded-xl bg-white p-6 shadow-sm">
                         <p className="text-sm text-gray-500">
                             Total Payments
                         </p>
@@ -261,8 +264,8 @@ export default function DashboardPage() {
                         </h2>
                     </div>
 
-                    <div onClick={() => router.push("/Payments?status=success")}
-                     className="rounded-xl bg-white p-6 shadow-sm">
+                    <div onClick={() => router.push("/Payments?status=captured")}
+                     className="cursor-pointer rounded-xl bg-white p-6 shadow-sm">
                         <p className="text-sm text-gray-500">
                             Successful Payments
                         </p>
