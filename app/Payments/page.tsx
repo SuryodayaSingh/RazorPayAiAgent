@@ -236,7 +236,7 @@ export default function PaymentsPage() {
                 async function (response:any) {
                     console.error("Payment failed", response.error);
                     try{
-                        await fetch("/api/Payments:status?failed", {
+                        await fetch("/api/Payments?status=failed", {
                             method: "POST",
                             headers: {"Content-Type": "application/json"},
                             body: JSON.stringify({
