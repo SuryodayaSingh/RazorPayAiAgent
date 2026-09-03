@@ -232,6 +232,27 @@ export default function PaymentsPage() {
             };
 
             const razorpayCheckout = new window.Razorpay(options);
+            razorpayCheckout.on("payment.failed",
+                async function (response:any) {
+                    console.error("Payment failed", response.error);
+                    try{
+                        await fetch("/api/Payments:status?failed", {
+                            method: "POST",
+                            headers: {"Content-Type": "application/json"},
+                            body: JSON.stringify({
+                                reazorpayOrderId: response.error.metadata.order_id,
+                                razorpayPaymentId: response.error.metadata.payment_id,
+                                errorCode: response.error.code,
+                                errorDescription: response.error.description,
+                                status: "failed",
+                            }),
+                        });
+                    } catch (err) {
+                        console.error("Failed to log payment", err)
+                    }
+                    alert(`Payment failed: ${response.error.description}`)
+                }
+            )
 
             razorpayCheckout.open();
         } catch (error) {
