@@ -236,17 +236,23 @@ export default function PaymentsPage() {
                 async function (response:any) {
                     console.error("Payment failed", response.error);
                     try{
-                        await fetch("/api/Payments?status=failed", {
+                        await fetch("/api/Payments", {
                             method: "POST",
                             headers: {"Content-Type": "application/json"},
                             body: JSON.stringify({
-                                reazorpayOrderId: response.error.metadata.order_id,
+                                rezorpayOrderId: response.error.metadata.order_id,
                                 razorpayPaymentId: response.error.metadata.payment_id,
                                 errorCode: response.error.code,
                                 errorDescription: response.error.description,
                                 status: "failed",
                             }),
                         });
+                        const data = await response.json();
+                        console.log ("Save payment response:", response.status, data);
+
+                        if(!response.ok) {
+                            console.error("Failed to save Payment", data)
+                        }
                     } catch (err) {
                         console.error("Failed to log payment", err)
                     }
