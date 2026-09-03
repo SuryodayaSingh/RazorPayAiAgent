@@ -13,7 +13,6 @@ export async function GET (
 
         const {PaymentId} = await params;
         console.log("Payment id from params:", PaymentId);
-        console.log("PARAMS", params)
 
         if(!PaymentId || PaymentId === "undefined") {
             return NextResponse.json({
@@ -22,9 +21,9 @@ export async function GET (
             }, {status: 400});
         }
 
-        const payment = await PaymentSchema.findOne({
-            razorpayPaymentId: PaymentId,
-        }).lean();
+       const payment = await PaymentSchema.findById
+       (PaymentId)
+       .lean();
 
         if(!payment) {
             return NextResponse.json({
@@ -34,13 +33,13 @@ export async function GET (
         }
 
         const aiAnalysis = await AIAnalysis.findOne({
-            paymentId: PaymentId,
+            paymentId: payment._id,
         })
         .sort({createdAt: -1})
         .lean();
 
         const recoveryActions = await RecoveryAction.find({
-             paymentId: PaymentId
+             paymentId: payment._id,
         })
         .sort({createdAt: -1})
         .lean();

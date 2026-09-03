@@ -8,10 +8,12 @@ import { analyzePayment } from "@/lib/aiAgent";
 import { executeRecoveryAction } from "@/lib/recoveryEngine";
 
 export async function POST(req: NextRequest) {
+    console.log("WEBHOOK HIT")
     try{
         await dbConnect();
 
         const rawBody = await req.text();
+        console.log("Webhook body received")
 
         const razorpaySignature = req.headers.get("x-razorpay-signature");
 

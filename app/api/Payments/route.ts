@@ -218,10 +218,6 @@ export async function POST(req: NextRequest) {
             payment.razorpayPaymentId
         );
 
-        // ----------------------------------------
-        // 8. AI ANALYSIS FOR FAILED PAYMENT
-        // ----------------------------------------
-
         let aiAnalysis = null;
         let recoveryAction = null;
 

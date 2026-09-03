@@ -204,25 +204,56 @@ export default function PaymentDetailsPage() {
                     </div>
                 </div>
 
-                {/* AI Analysis */}
-                <div className="mb-6 rounded-xl bg-white p-6 shadow-sm">
-                    <h2 className="mb-4 text-xl font-semibold">
-                        AI Analysis
-                    </h2>
+                
+                <div className="mb-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+                    <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white p-6">
+                  <div className="flex items-center gap-3">
+    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-300 text-white">
+        ✨
+    </div>
+
+    <div>
+        <h2 className="text-xl font-semibold text-gray-900">
+            AI Analysis
+        </h2>
+
+        <p className="mt-1 text-sm text-gray-500">
+            AI-powered analysis of this failed payment
+        </p>
+    </div>
+</div>
+                    </div>
+                    
 
                     {aiAnalysis ? (
                         <div className="space-y-3">
 
-                            <div>
+                            <div className="grid gap-4 md:grid-cols-3">
                                 <p className="text-sm text-gray-500">
                                     Risk Level
                                 </p>
+
+                                <div>
+                                    <span
+                            className={`inline-flex rounded-full px-4 py-1.5 text-sm font-bold ${
+                                aiAnalysis.riskLevel === "LOW"
+                                    ? "bg-green-100 text-green-700"
+                                    : aiAnalysis.riskLevel === "MEDIUM"
+                                    ? "bg-yellow-100 text-yellow-700"
+                                    : aiAnalysis.riskLevel === "HIGH"
+                                    ? "bg-red-100 text-red-700"
+                                    : "bg-gray-100 text-gray-700"
+                                       }`}
+                                          >
+                                     {aiAnalysis.riskLevel || "N/A"}
+                                    </span>
+                                </div>
                                 <p className="font-medium">
                                     {aiAnalysis.riskLevel || "N/A"}
                                 </p>
                             </div>
 
-                            <div>
+                            <div className="rounded-xl border border-gray-200 bg-gray-50 p-5">
                                 <p className="text-sm text-gray-500">
                                     Recovery Probability
                                 </p>
@@ -235,6 +266,23 @@ export default function PaymentDetailsPage() {
                                         : "N/A"}
                                 </p>
                             </div>
+
+                             {aiAnalysis.recoveryProbability != null && (
+                              <div className="mt-4 h-2 overflow-hidden rounded-full bg-gray-200">
+                            <div
+                                className="h-full rounded-full bg-black transition-all"
+                                style={{
+                                    width: `${Math.min(
+                                        Math.max(
+                                            aiAnalysis.recoveryProbability * 100,
+                                            0
+                                  ),
+                                100
+                                  )}%`,
+                                }}
+                            />
+                            </div>
+                        )}
 
                             <div>
                                 <p className="text-sm text-gray-500">
@@ -253,6 +301,22 @@ export default function PaymentDetailsPage() {
                                     {aiAnalysis.reason || "N/A"}
                                 </p>
                             </div>
+                              <div className="mt-4 rounded-xl border border-green-100 bg-green-50/50 p-5">
+
+                <div className="flex items-center gap-2">
+                    <span className="text-lg"></span>
+
+                    <h3 className="font-semibold text-gray-900">
+                        AI Recommendation
+                    </h3>
+                </div>
+
+                <p className="mt-3 leading-7 text-gray-700">
+                    {aiAnalysis.message ||
+                        "No recommendation message was provided."}
+                </p>
+            </div>
+
 
                         </div>
                     ) : (
@@ -262,43 +326,108 @@ export default function PaymentDetailsPage() {
                     )}
                 </div>
 
-                <div className="rounded-xl bg-white p-6 shadow-sm">
-                    <h2 className="mb-4 text-xl font-semibold">
-                        Recovery Actions
-                    </h2>
 
-                    {recoveryActions.length > 0 ? (
-                        <div className="space-y-3">
-                            {recoveryActions.map((action) => (
-                                <div
-                                    key={action._id}
-                                    className="rounded-lg border p-4"
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <p className="font-medium">
-                                            {action.action || "Recovery Action"}
-                                        </p>
+                <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+    <div className="mb-5">
+        <h2 className="text-xl font-semibold">
+            Recovery
+        </h2>
 
-                                        <span className="rounded-full bg-gray-100 px-3 py-1 text-sm">
-                                            {action.status || "N/A"}
-                                        </span>
-                                    </div>
+        <p className="mt-1 text-sm text-gray-500">
+            AI-driven recovery action for this payment
+        </p>
+    </div>
 
-                                    {action.createdAt && (
-                                        <p className="mt-2 text-sm text-gray-500">
-                                            {new Date(
-                                                action.createdAt
-                                            ).toLocaleString()}
-                                        </p>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="text-gray-500">
-                            No recovery actions available.
-                        </p>
-                    )}
+    {recoveryActions.length > 0 ? (
+        <div className="space-y-5">
+
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-5">
+                <p className="text-sm text-gray-500">
+                    AI Recommendation
+                </p>
+
+                <p className="mt-1 text-lg font-semibold">
+                    {aiAnalysis?.recommendedAction || "N/A"}
+                </p>
+            </div>
+
+
+            <div className="grid gap-4 md:grid-cols-3">
+
+            
+                <div className="rounded-xl border border-gray-200 p-5">
+                    <p className="text-sm text-gray-500">
+                        Status
+                    </p>
+
+                    <div className="mt-2">
+                        <span
+                            className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${
+                                recoveryActions[0].status === "EXECUTED"
+                                    ? "bg-green-100 text-green-700"
+                                    : recoveryActions[0].status === "FAILED"
+                                    ? "bg-red-100 text-red-700"
+                                    : recoveryActions[0].status === "PENDING"
+                                    ? "bg-yellow-100 text-yellow-700"
+                                    : "bg-gray-100 text-gray-700"
+                            }`}
+                        >
+                            {recoveryActions[0].status || "N/A"}
+                        </span>
+                    </div>
+                </div>
+
+             
+                <div className="rounded-xl border border-gray-200 p-5">
+                    <p className="text-sm text-gray-500">
+                        Action Taken
+                    </p>
+
+                    <p className="mt-2 font-semibold">
+                        {recoveryActions[0].action || "N/A"}
+                    </p>
+                </div>
+
+      
+                <div className="rounded-xl border border-gray-200 p-5">
+                    <p className="text-sm text-gray-500">
+                        Time
+                    </p>
+
+                    <p className="mt-2 font-medium">
+                        {recoveryActions[0].createdAt
+                            ? new Date(
+                                  recoveryActions[0].createdAt
+                              ).toLocaleString()
+                            : "N/A"}
+                    </p>
+                </div>
+            </div>
+
+            <div className="rounded-xl border border-green-200 bg-green-50 p-5">
+                <p className="text-sm font-medium text-green-700">
+                    Recovery Result
+                </p>
+
+                <p className="mt-1 text-gray-700">
+                    {recoveryActions[0].status === "EXECUTED"
+                        ? recoveryActions[0].action === "SEND_REMINDER"
+                            ? "Recovery email sent successfully."
+                            : "Recovery action executed successfully."
+                        : recoveryActions[0].status === "FAILED"
+                        ? "Recovery action failed."
+                        : "Recovery action is pending."}
+                       </p>
+                         </div>
+
+                   </div>
+              ) : (
+                  <div className="rounded-xl border border-dashed border-gray-300 p-6 text-center">
+            <p className="text-gray-500">
+                No recovery action available.
+                  </p>
+                  </div>
+               )}
                 </div>
 
             </div>
