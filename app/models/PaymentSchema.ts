@@ -19,8 +19,8 @@ const PaymentSchema= new mongoose.Schema({
 
     recoveryPaymentId:{
         type: String,
-        required: true,
-        unique: true,
+        index: true,
+        sparse: true,
     } ,
     customerId: {
         type: mongoose.Schema.Types.ObjectId,

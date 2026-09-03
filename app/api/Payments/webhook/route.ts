@@ -98,10 +98,27 @@ export async function POST(req: NextRequest) {
 
                              if(payment) {
                                 console.log("Payment already exists:", razorpayPaymentId);
-                                return NextResponse.json({
-                                    success: true,
-                                    message: "Payment Already processed",
-                                }, {status: 200});
+
+                                payment = await PaymentSchema.findOneAndUpdate(
+                                    {razorpayPaymentId},
+                                     {
+                                        razorpayOrderId,
+                                      amount,
+                                    currency,
+                                        status: "failed",
+                                     method,
+                                    email,
+                                       contact,
+                                   errorCode,
+                                    ErrorDescription: failureReason,
+                                      recoveryStatus: "NOT_STARTED",
+                                      createdAtRazorPay:
+                                       createdAtRazorPay ||
+                                     Math.floor(Date.now() / 1000),
+                                     },
+                                     {new: true}
+                                )
+                               
                              } else {
                                 payment = await PaymentSchema.create({
                                     razorpayPaymentId,
@@ -120,6 +137,10 @@ export async function POST(req: NextRequest) {
                                         Date.now()/1000
                                     ),
                                 });
+
+                            }
+
+                                
 
                                 console.log("Failed payment saved:", payment.razorpayPaymentId);
 
@@ -143,7 +164,7 @@ export async function POST(req: NextRequest) {
                                               : undefined,
                                                customer: { email: email ? String(email)
                                                  : undefined,
-                                                 },
+                                               },
                                                  });
                                     console.log( " Gemini AI result:", aiResult );
 
@@ -195,7 +216,7 @@ export async function POST(req: NextRequest) {
                                     aiAnalysis,
                                     recoveryAction,
                                 }, {status: 200});
-                             }
+                             
                             } catch(error) {
                                 console.error("Razorpay webhook error", error);
 

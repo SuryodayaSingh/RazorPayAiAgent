@@ -22,6 +22,7 @@ interface AIAnalysis {
     recoveryProbability?: number;
     recommendedAction?: string;
     reason?: string;
+    message?: string;
     createdAt?: string;
 }
 
