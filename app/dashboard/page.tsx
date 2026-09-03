@@ -1,5 +1,13 @@
 "use client";
 
+import {
+    PieChart,
+    Pie,
+    Cell,
+    Tooltip,
+    Legend,
+    ResponsiveContainer,
+} from "recharts";
 import {useRouter} from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -59,6 +67,7 @@ export default function DashboardPage() {
     const [error, setError] = useState("");
     
     const router = useRouter();
+
 
 
     const fetchDashboard = async () => {
@@ -133,6 +142,21 @@ export default function DashboardPage() {
     }
 
     const { stats, recentPayments, actionDistribution } = data;
+
+     const riskData = [
+    {
+        name: "LOW",
+        value: stats.riskDistribution.LOW,
+    },
+    {
+        name: "MEDIUM",
+        value: stats.riskDistribution.MEDIUM,
+    },
+    {
+        name: "HIGH",
+        value: stats.riskDistribution.HIGH,
+    },
+];
 
     const formatAction = (action: string) => {
         return action
@@ -520,59 +544,104 @@ export default function DashboardPage() {
 
                 <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
 
-                    <div className="rounded-xl bg-white p-6 shadow-sm">
+<div className="rounded-xl bg-white p-6 shadow-sm">
 
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h2 className="text-xl font-semibold text-gray-900">
-                                    AI Risk Distribution
-                                </h2>
+    <div className="flex items-center justify-between">
+        <div>
+            <h2 className="text-xl font-semibold text-gray-900">
+                AI Risk Distribution
+            </h2>
 
-                                <p className="mt-1 text-sm text-gray-500">
-                                    Risk classification of failed payments
-                                </p>
-                            </div>
+            <p className="mt-1 text-sm text-gray-500">
+                Risk classification of failed payments
+            </p>
+        </div>
 
-                            <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium">
-                                {stats.totalAIAnalysis} analyses
-                            </span>
-                        </div>
+        <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium">
+            {stats.totalAIAnalysis} analyses
+        </span>
+    </div>
 
-                        <div className="mt-6 grid grid-cols-3 gap-4">
+    <div className="mt-6 h-[300px] w-full">
 
-                            <div className="rounded-lg bg-green-50 p-4 text-center">
-                                <p className="text-sm text-gray-500">
-                                    LOW
-                                </p>
+        {stats.totalAIAnalysis === 0 ? (
+            <div className="flex h-full items-center justify-center">
+                <p className="text-sm text-gray-500">
+                    No AI risk data available.
+                </p>
+            </div>
+        ) : (
+            <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
 
-                                <p className="mt-2 text-3xl font-bold text-green-600">
-                                    {stats.riskDistribution.LOW}
-                                </p>
-                            </div>
+                    <Pie
+                        data={riskData}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={100}
+                        innerRadius={55}
+                        paddingAngle={3}
+                        label={({ name, percent }) =>
+                            `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
+                        }
+                    >
 
+                        <Cell fill="#22c55e" />
+                        <Cell fill="#eab308" />
+                        <Cell fill="#ef4444" />
 
-                            <div className="rounded-lg bg-yellow-50 p-4 text-center">
-                                <p className="text-sm text-gray-500">
-                                    MEDIUM
-                                </p>
+                    </Pie>
 
-                                <p className="mt-2 text-3xl font-bold text-yellow-600">
-                                    {stats.riskDistribution.MEDIUM}
-                                </p>
-                            </div>
+                    <Tooltip />
 
-                             <div className="rounded-lg bg-red-50 p-4 text-center">
-                                <p className="text-sm text-gray-500">
-                                    HIGH
-                                </p>
+                    <Legend
+                        verticalAlign="bottom"
+                        height={36}
+                    />
 
-                                <p className="mt-2 text-3xl font-bold text-red-600">
-                                    {stats.riskDistribution.HIGH}
-                                </p>
-                            </div>
+                </PieChart>
+            </ResponsiveContainer>
+        )}
 
-                        </div>
-                    </div>
+    </div>
+
+    <div className="mt-4 grid grid-cols-3 gap-3">
+
+        <div className="rounded-lg bg-green-50 p-3 text-center">
+            <p className="text-xs text-gray-500">
+                LOW
+            </p>
+
+            <p className="mt-1 text-xl font-bold text-green-600">
+                {stats.riskDistribution.LOW}
+            </p>
+        </div>
+
+        <div className="rounded-lg bg-yellow-50 p-3 text-center">
+            <p className="text-xs text-gray-500">
+                MEDIUM
+            </p>
+
+            <p className="mt-1 text-xl font-bold text-yellow-600">
+                {stats.riskDistribution.MEDIUM}
+            </p>
+        </div>
+
+        <div className="rounded-lg bg-red-50 p-3 text-center">
+            <p className="text-xs text-gray-500">
+                HIGH
+            </p>
+
+            <p className="mt-1 text-xl font-bold text-red-600">
+                {stats.riskDistribution.HIGH}
+            </p>
+        </div>
+
+    </div>
+
+</div>
 
 
                     <div className="rounded-xl bg-white p-6 shadow-sm">
