@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@base-ui/react";
+import { Plus } from "lucide-react";
 import {
     PieChart,
     Pie,
@@ -256,6 +258,14 @@ export default function DashboardPage() {
                             AI-powered payment revenue recovery
                         </p>
                     </div>
+
+                    <Button
+                         onClick={() => router.push("/Payment")}
+                         className="gap-2"
+                            >
+                         <Plus className="h-4 w-4" />
+                         Create Payment
+                    </Button>
 
                     <button
                         onClick={fetchDashboard}
