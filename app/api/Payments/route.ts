@@ -138,6 +138,14 @@ export async function POST(req: NextRequest) {
      const existingAIAnalysis = await AIAnalysis.findOne({
         paymentId: existingPayment._id,
     });
+    if(existingAIAnalysis) {
+        return NextResponse.json({
+            success: true,
+            message: "Payment already Proccessed",
+            payment: existingPayment,
+            aiAnalysis: existingAIAnalysis
+        },{status: 200})
+    }
     const existingRecoveryAction =
                 existingPayment.status === "failed"
                     ? null
@@ -303,7 +311,7 @@ export async function POST(req: NextRequest) {
 
 
                        recoveryAction = await executeRecoveryAction(
-                      payment.razorpayPaymentId,
+                      payment._id.toString(),
                     payment.razorpayOrderId,
                     aiResult,
                      verifiedEmail,

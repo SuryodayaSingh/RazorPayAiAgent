@@ -40,7 +40,12 @@ export async function GET (
         .lean();
 
         const recoveryActions = await RecoveryAction.find({
-             paymentId: payment._id,
+             paymentId: {
+                $in:[
+                    payment._id.toString(),
+                    payment.razorpayPaymentId,
+                ],
+             }
         })
         .sort({createdAt: -1})
         .lean();

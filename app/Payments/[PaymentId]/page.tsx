@@ -338,7 +338,7 @@ export default function PaymentDetailsPage() {
         </p>
     </div>
 
-    {recoveryActions.length > 0 ? (
+    {recoveryActions && recoveryActions.length > 0 ? (
         <div className="space-y-5">
 
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-5">
@@ -363,11 +363,11 @@ export default function PaymentDetailsPage() {
                     <div className="mt-2">
                         <span
                             className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${
-                                recoveryActions[0].status === "EXECUTED"
+                                recoveryActions[0]?.status === "EXECUTED"
                                     ? "bg-green-100 text-green-700"
-                                    : recoveryActions[0].status === "FAILED"
+                                    : recoveryActions[0]?.status === "FAILED"
                                     ? "bg-red-100 text-red-700"
-                                    : recoveryActions[0].status === "PENDING"
+                                    : recoveryActions[0]?.status === "PENDING"
                                     ? "bg-yellow-100 text-yellow-700"
                                     : "bg-gray-100 text-gray-700"
                             }`}
@@ -404,33 +404,47 @@ export default function PaymentDetailsPage() {
                 </div>
             </div>
 
-            <div className="rounded-xl border border-green-200 bg-green-50 p-5">
-                <p className="text-sm font-medium text-green-700">
-                    Recovery Result
-                </p>
+            <div
+            className={`rounded-xl border p-5 ${
+                recoveryActions[0]?.status === "EXECUTED"
+                    ? "border-green-200 bg-green-50"
+                    : recoveryActions[0]?.status === "FAILED"
+                    ? "border-red-200 bg-red-50"
+                    : "border-yellow-200 bg-yellow-50"
+            }`}
+        >
+            <p
+                className={`text-sm font-medium ${
+                    recoveryActions[0]?.status === "EXECUTED"
+                        ? "text-green-700"
+                        : recoveryActions[0]?.status === "FAILED"
+                        ? "text-red-700"
+                        : "text-yellow-700"
+                }`}
+            >
+                Recovery Result
+            </p>
 
-                <p className="mt-1 text-gray-700">
-                    {recoveryActions[0].status === "EXECUTED"
-                        ? recoveryActions[0].action === "SEND_REMINDER"
-                            ? "Recovery email sent successfully."
-                            : "Recovery action executed successfully."
-                        : recoveryActions[0].status === "FAILED"
-                        ? "Recovery action failed."
-                        : "Recovery action is pending."}
-                       </p>
-                         </div>
+            <p className="mt-1 text-gray-700">
+                {recoveryActions[0]?.status === "EXECUTED"
+                    ? recoveryActions[0]?.action === "SEND_REMINDER"
+                        ? "Recovery email sent successfully."
+                        : "Recovery action executed successfully."
+                    : recoveryActions[0]?.status === "FAILED"
+                    ? "Recovery action failed."
+                    : "Recovery action is pending."}
+            </p>
+        </div>
 
-                   </div>
-              ) : (
-                  <div className="rounded-xl border border-dashed border-gray-300 p-6 text-center">
-            <p className="text-gray-500">
-                No recovery action available.
-                  </p>
-                  </div>
-               )}
-                </div>
-
-            </div>
-        </main>
-    );
-}
+    </div>
+) : (
+    <div className="rounded-xl border border-dashed border-gray-300 p-6 text-center">
+        <p className="text-gray-500">
+            No recovery action available.
+        </p>
+    </div>
+)}
+</div>
+</div>
+</main>
+)};
