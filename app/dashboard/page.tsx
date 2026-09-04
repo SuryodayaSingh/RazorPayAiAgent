@@ -258,10 +258,12 @@ export default function DashboardPage() {
                             AI-powered payment revenue recovery
                         </p>
                     </div>
+                    
+                    <div className="flex">
 
                     <Button
-                         onClick={() => router.push("/Payment")}
-                         className="gap-2"
+                         onClick={() => router.push("/Payments")}
+                         className="cursor-pointer gap-1 mx-2 bg-blue-200 rounded-xl p-2 flex"
                             >
                          <Plus className="h-4 w-4" />
                          Create Payment
@@ -269,10 +271,11 @@ export default function DashboardPage() {
 
                     <button
                         onClick={fetchDashboard}
-                        className="rounded-lg border bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-gray-50"
+                        className="cursor-pointer rounded-lg border bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-gray-50"
                     >
                         Refresh
                     </button>
+                    </div>
                 </div>
 
 <div className="mt-8 rounded-2xl bg-white p-6 shadow-sm">
