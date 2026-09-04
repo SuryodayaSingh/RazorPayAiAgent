@@ -893,7 +893,7 @@ export default function DashboardPage() {
 
                                                 {payment.aiAction ? (
                                                     <button onClick={() =>
-                                                        router.push(`/Payments/${payment._id}`)
+                                                        router.push(`/Payments/${payment.razorpayPaymentId}`)
                                                     }
                                                     className="cursor-pointer rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 transition hover:bg-blue-200"
                                                     >
