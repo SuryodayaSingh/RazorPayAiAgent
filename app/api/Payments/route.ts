@@ -22,9 +22,6 @@ export async function POST(req: NextRequest) {
             customer,
         } = body;
 
-        // ----------------------------------------
-        // 1. VALIDATE REQUIRED FIELDS
-        // ----------------------------------------
 
         if (
             !razorpayPaymentId ||
@@ -87,9 +84,7 @@ export async function POST(req: NextRequest) {
             "Razorpay signature verified successfully"
         );
 
-        // ----------------------------------------
-        // 3. FETCH PAYMENT FROM RAZORPAY
-        // ----------------------------------------
+
 
         let razorpayPayment;
 

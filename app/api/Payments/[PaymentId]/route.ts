@@ -21,8 +21,9 @@ export async function GET (
             }, {status: 400});
         }
 
-       const payment = await PaymentSchema.findById
-       (PaymentId)
+       const payment = await PaymentSchema.findOne({
+         razorpayPaymentId: PaymentId,
+       })
        .lean();
 
         if(!payment) {
