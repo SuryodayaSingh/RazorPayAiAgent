@@ -18,7 +18,6 @@ export async function POST(req: NextRequest) {
             razorpayPaymentId,
             razorpayOrderId,
             razorpaySignature,
-            customerId,
             customer,
         } = body;
 
@@ -38,9 +37,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // ----------------------------------------
-        // 2. VERIFY RAZORPAY SIGNATURE
-        // ----------------------------------------
+
 
         const secret = process.env.RAZORPAY_KEY_SECRET;
 
@@ -109,9 +106,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // ----------------------------------------
-        // 4. VERIFY ORDER ID
-        // ----------------------------------------
+
 
         if (
             razorpayPayment.order_id &&
@@ -127,9 +122,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // ----------------------------------------
-        // 5. CHECK DUPLICATE PAYMENT
-        // ----------------------------------------
+
 
         const existingPayment =
             await PaymentSchema.findOne({
@@ -137,6 +130,35 @@ export async function POST(req: NextRequest) {
             });
 
         if (existingPayment) {
+             console.log(
+        "Payment already exists:",
+        existingPayment.razorpayPaymentId
+    );
+
+     const existingAIAnalysis = await AIAnalysis.findOne({
+        paymentId: existingPayment._id,
+    });
+    const existingRecoveryAction =
+                existingPayment.status === "failed"
+                    ? null
+                    : null;
+
+    if (existingAIAnalysis) {
+        return NextResponse.json(
+            {
+                success: true,
+                message: "Payment already processed",
+                payment: existingPayment,
+                aiAnalysis: existingAIAnalysis,
+            },
+            { status: 200 }
+        );
+    }
+
+    console.log(
+        "Payment exists but AI analysis is missing. Processing AI..."
+    );
+
             return NextResponse.json(
                 {
                     success: true,
@@ -147,9 +169,6 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // ----------------------------------------
-        // 6. GET VERIFIED PAYMENT DATA
-        // ----------------------------------------
 
         const verifiedAmount =
             razorpayPayment.amount;
@@ -175,8 +194,10 @@ export async function POST(req: NextRequest) {
             razorpayPayment.error_description;
 
 
+            let payment = existingPayment;
 
-        const payment = await PaymentSchema.create({
+       if(!payment){
+        payment = await PaymentSchema.create({
             razorpayPaymentId,
 
             razorpayOrderId,
@@ -208,11 +229,20 @@ export async function POST(req: NextRequest) {
                     : Math.floor(Date.now() /1000),
         });
 
-        console.log(
+                     console.log(
             "Payment saved successfully:",
             payment.razorpayPaymentId
         );
 
+        } else{
+            console.log(
+                "Using existing payment:",
+                payment.razorpayPaymentId
+            );
+        
+       }
+
+       
         let aiAnalysis = null;
         let recoveryAction = null;
 
@@ -233,7 +263,7 @@ export async function POST(req: NextRequest) {
                         });
 
                 aiAnalysis =
-                    await AIAnalysis.create({
+                    await AIAnalysis.findOneAndUpdate({
                         paymentId: payment._id,
 
                         riskLevel:
@@ -248,7 +278,11 @@ export async function POST(req: NextRequest) {
                         reason:
                             aiResult.reason,
                             message: aiResult.message,
-                    });
+                    },
+                 {
+                            new: true,
+                            upsert: true,
+                        });
 
                 await PaymentSchema.findByIdAndUpdate(
                     payment._id,

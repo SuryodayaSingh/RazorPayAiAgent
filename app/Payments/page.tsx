@@ -58,6 +58,16 @@ export default function PaymentsPage() {
 
     const [payments, setPayments] = useState<Payment[]>([]);
     const [loading, setLoading] = useState(true);
+    const [showCustomPayment, setShowCustomPayment] = useState(false);
+
+    const [customPayment, setCustomPayment] = useState({
+    name: "",
+    email: "",
+    contact: "",
+    amount: "",
+    currency: "INR",
+    description: "Custom Payment",
+});
     const [paymentLoading, setPaymentLoading] = useState(false);
 
     const [search, setSearch] = useState("");
@@ -253,6 +263,199 @@ export default function PaymentsPage() {
         }
     };
 
+    const handleCustomPayment = async () => {
+    try {
+        const amount = Number(customPayment.amount);
+
+        if (!customPayment.name.trim()) {
+            alert("Please enter customer name");
+            return;
+        }
+
+        if (!customPayment.email.trim()) {
+            alert("Please enter customer email");
+            return;
+        }
+
+        if (!customPayment.contact.trim()) {
+            alert("Please enter customer contact");
+            return;
+        }
+
+        if (!amount || amount <= 0) {
+            alert("Please enter a valid amount");
+            return;
+        }
+
+        setPaymentLoading(true);
+
+        const response = await fetch("/api/Payments/create-order", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                amount,
+                currency: customPayment.currency,
+                customer: {
+                    name: customPayment.name,
+                    email: customPayment.email,
+                    contact: customPayment.contact,
+                },
+                description: customPayment.description,
+            }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(
+                data.message || "Failed to create payment order"
+            );
+        }
+
+        const order = data.order;
+
+        if (!window.Razorpay) {
+            throw new Error("Razorpay Checkout has not loaded yet.");
+        }
+
+        const options = {
+            key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+
+            amount: order.amount,
+            currency: order.currency,
+            order_id: order.id,
+
+            name: "AI Revenue Recovery",
+            description: customPayment.description,
+
+            prefill: {
+                name: customPayment.name,
+                email: customPayment.email,
+                contact: customPayment.contact,
+            },
+
+            notes: {
+                project: "AI Revenue Recovery",
+                customer_name: customPayment.name,
+                customer_email: customPayment.email,
+                customer_contact: customPayment.contact,
+            },
+
+            theme: {
+                color: "#000000",
+            },
+
+            handler: async function (paymentResponse: any) {
+                try {
+                    const verifyResponse = await fetch(
+                        "/api/Payments",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                razorpayPaymentId:
+                                    paymentResponse.razorpay_payment_id,
+
+                                razorpayOrderId:
+                                    paymentResponse.razorpay_order_id,
+
+                                razorpaySignature:
+                                    paymentResponse.razorpay_signature,
+
+                                customer: {
+                                    name: customPayment.name,
+                                    email: customPayment.email,
+                                    contact: customPayment.contact,
+                                },
+
+                                amount: amount * 100,
+                                currency: customPayment.currency,
+                            }),
+                        }
+                    );
+
+                    const result = await verifyResponse.json();
+
+                    if (!verifyResponse.ok || !result.success) {
+                        throw new Error(
+                            result.message ||
+                                result.error ||
+                                "Payment verification failed"
+                        );
+                    }
+
+                    alert(
+                        `Payment successful!\n\nPayment ID: ${paymentResponse.razorpay_payment_id}`
+                    );
+
+                    setShowCustomPayment(false);
+
+                    setCustomPayment({
+                        name: "",
+                        email: "",
+                        contact: "",
+                        amount: "",
+                        currency: "INR",
+                        description: "Custom Payment",
+                    });
+
+                    await fetchPayments();
+                } catch (error) {
+                    console.error(
+                        "Custom payment verification error:",
+                        error
+                    );
+
+                    alert(
+                        error instanceof Error
+                            ? error.message
+                            : "Payment verification failed"
+                    );
+                }
+            },
+
+            modal: {
+                ondismiss: () => {
+                    console.log("Custom Razorpay Checkout closed");
+                },
+            },
+        };
+
+        const razorpayCheckout = new window.Razorpay(options);
+
+        razorpayCheckout.on(
+            "payment.failed",
+            function (response: any) {
+                console.error(
+                    "Custom payment failed:",
+                    response
+                );
+
+                alert(
+                    response?.error?.description ||
+                        "Payment failed"
+                );
+            }
+        );
+
+        razorpayCheckout.open();
+    } catch (error) {
+        console.error("Custom Payment Error:", error);
+
+        alert(
+            error instanceof Error
+                ? error.message
+                : "Unable to start payment"
+        );
+    } finally {
+        setPaymentLoading(false);
+    }
+};
+
 
 
     const filteredPayments = useMemo(() => {
@@ -402,11 +605,18 @@ export default function PaymentsPage() {
                     <button
                         onClick={handleTestPayment}
                         disabled={paymentLoading}
-                        className="rounded-lg bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="cursor-pointer rounded-lg bg-black px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         {paymentLoading
                             ? "Opening Checkout..."
                             : "Test Payment ₹499"}
+                    </button>
+
+                    <button
+                     onClick={() => setShowCustomPayment(true)}
+                     className="cursor-pointer rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-100"
+                            >
+                          Custom Payment
                     </button>
 
  
@@ -414,7 +624,7 @@ export default function PaymentsPage() {
                     <button
                         onClick={fetchPayments}
                         disabled={loading}
-                        className="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 disabled:opacity-60"
+                        className="cursor-pointer rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 disabled:opacity-60"
                     >
                         {loading ? "Refreshing..." : "Refresh"}
                     </button>
@@ -766,6 +976,185 @@ export default function PaymentsPage() {
                     {payments.length} payments
                 </p>
             </div>
+            {showCustomPayment && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
+
+            <div className="mb-6 flex items-center justify-between">
+                <div>
+                    <h2 className="text-xl font-bold text-gray-900">
+                        Create Custom Payment
+                    </h2>
+
+                    <p className="mt-1 text-sm text-gray-500">
+                        Enter customer and payment details
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    onClick={() => setShowCustomPayment(false)}
+                    className="cursor-pointer rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+                >
+                    ✕
+                </button>
+            </div>
+
+            <div className="space-y-4">
+
+
+                <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Customer Name
+                    </label>
+
+                    <input
+                        type="text"
+                        value={customPayment.name}
+                        onChange={(e) =>
+                            setCustomPayment({
+                                ...customPayment,
+                                name: e.target.value,
+                            })
+                        }
+                        placeholder="Enter Your Name"
+                        className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-black"
+                    />
+                </div>
+
+          
+                <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Email
+                    </label>
+
+                    <input
+                        type="email"
+                        value={customPayment.email}
+                        onChange={(e) =>
+                            setCustomPayment({
+                                ...customPayment,
+                                email: e.target.value,
+                            })
+                        }
+                        placeholder="Enter Your Email"
+                        className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-black"
+                    />
+                </div>
+
+            
+                <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Contact
+                    </label>
+
+                    <input
+                        type="tel"
+                        value={customPayment.contact}
+                        onChange={(e) =>
+                            setCustomPayment({
+                                ...customPayment,
+                                contact: e.target.value,
+                            })
+                        }
+                        placeholder="Phone"
+                        className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-black"
+                    />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+
+                    <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-700">
+                            Amount
+                        </label>
+
+                        <input
+                            type="number"
+                            min="1"
+                            value={customPayment.amount}
+                            onChange={(e) =>
+                                setCustomPayment({
+                                    ...customPayment,
+                                    amount: e.target.value,
+                                })
+                            }
+                            placeholder=""
+                            className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-black"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-700">
+                            Currency
+                        </label>
+
+                        <select
+                            value={customPayment.currency}
+                            onChange={(e) =>
+                                setCustomPayment({
+                                    ...customPayment,
+                                    currency: e.target.value,
+                                })
+                            }
+                            className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-black"
+                        >
+                            <option value="INR">INR</option>
+                            <option value="USD">USD</option>
+                        </select>
+                    </div>
+
+                </div>
+
+               
+                <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700">
+                        Description
+                    </label>
+
+                    <input
+                        type="text"
+                        value={customPayment.description}
+                        onChange={(e) =>
+                            setCustomPayment({
+                                ...customPayment,
+                                description: e.target.value,
+                            })
+                        }
+                        placeholder="Description"
+                        className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-black"
+                    />
+                </div>
+
+            </div>
+
+          
+            <div className="mt-6 flex justify-end gap-3">
+
+                <button
+                    type="button"
+                    onClick={() => setShowCustomPayment(false)}
+                    className="cursor-pointer rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="button"
+                    onClick={handleCustomPayment}
+                    disabled={paymentLoading}
+                    className="cursor-pointer rounded-lg bg-black px-5 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                    {paymentLoading
+                        ? "Opening Checkout..."
+                        : "Create Payment"}
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+)}
         </div>
     );
 }

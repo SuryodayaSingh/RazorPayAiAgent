@@ -189,6 +189,7 @@ export default function DashboardPage() {
             default:
                 return "bg-gray-100 text-gray-700";
         }
+    };
 
         const getRecoveryClass = (status?: string) => {
         switch (status) {
@@ -220,7 +221,7 @@ export default function DashboardPage() {
             .replace(/\b\w/g, (char) => char.toUpperCase());
     };
 
-    };
+    
 
     const getStatusClass = (status?: string) => {
         switch (status) {
@@ -282,11 +283,12 @@ export default function DashboardPage() {
         </div>
     </div>
 
-    {/* AI IMPACT CARDS */}
+
     <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 
-        {/* Payments Analyzed */}
-        <div className="rounded-xl border bg-gray-50 p-5">
+       
+        <div onClick={()=> router.push("/AiAnalysis")}
+         className="cursor-pointer rounded-xl border bg-gray-50 p-5">
             <p className="text-sm text-gray-500">
                 Payments Analyzed
             </p>
@@ -300,7 +302,7 @@ export default function DashboardPage() {
             </p>
         </div>
 
-        {/* High Risk */}
+      
         <div className="rounded-xl border bg-red-50 p-5">
             <p className="text-sm text-gray-500">
                 High Risk Payments
@@ -315,8 +317,9 @@ export default function DashboardPage() {
             </p>
         </div>
 
-        {/* Recovery Actions */}
-        <div className="rounded-xl border bg-blue-50 p-5">
+
+        <div onClick={() => router.push("/RecoveryActions")}
+         className="cursor-pointer rounded-xl border bg-blue-50 p-5">
             <p className="text-sm text-gray-500">
                 Recovery Actions
             </p>
@@ -330,8 +333,8 @@ export default function DashboardPage() {
             </p>
         </div>
 
-        {/* Recovery Attempts */}
-        <div className="rounded-xl border bg-purple-50 p-5">
+        <div
+         className="rounded-xl border bg-purple-50 p-5">
             <p className="text-sm text-gray-500">
                 Recovery Attempts
             </p>
